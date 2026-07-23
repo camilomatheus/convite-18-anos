@@ -1,790 +1,109 @@
-/*=========================
-AOS
-=========================*/
-
-AOS.init({
-
-    duration:1200,
-
-    once:false
-
-});
-
-/*=========================
-EFEITO DIGITAÇÃO
-=========================*/
-
-const texto = "🎉 Meus 18 Anos 🎉";
-
-let i = 0;
-
-function escrever(){
-
-    if(i < texto.length){
-
-        document.getElementById("typing").innerHTML += texto.charAt(i);
-
-        i++;
-
-        setTimeout(escrever,120);
-
+const festa = new Date(2026, 9, 11, 12, 0, 0).getTime();
+const campos = { dias: document.querySelector('#dias'), horas: document.querySelector('#horas'), minutos: document.querySelector('#minutos'), segundos: document.querySelector('#segundos') };
+let intervalo;
+function atualizarContagem() {
+  const restante = Math.max(0, festa - Date.now());
+  const valores = { dias: Math.floor(restante / 86400000), horas: Math.floor(restante % 86400000 / 3600000), minutos: Math.floor(restante % 3600000 / 60000), segundos: Math.floor(restante % 60000 / 1000) };
+  Object.entries(valores).forEach(([nome, valor]) => {
+    const proximoValor = String(valor).padStart(2, '0');
+    if (campos[nome].textContent !== proximoValor) {
+      campos[nome].textContent = proximoValor;
+      campos[nome].classList.remove('tick');
+      void campos[nome].offsetWidth;
+      campos[nome].classList.add('tick');
     }
-
+  });
+  if (!restante && intervalo) clearInterval(intervalo);
 }
+atualizarContagem(); intervalo = setInterval(atualizarContagem, 1000);
 
-escrever();
+const progressBar = document.querySelector('#progressBar'); const topButton = document.querySelector('#topButton');
+addEventListener('scroll', () => { const max = document.documentElement.scrollHeight - innerHeight; progressBar.style.width = `${max ? scrollY / max * 100 : 0}%`; topButton.classList.toggle('visible', scrollY > 500); }, { passive: true });
+topButton.addEventListener('click', () => scrollTo({ top: 0, behavior: 'smooth' }));
 
-/*=========================
-CONTAGEM REGRESSIVA
-=========================*/
+const menuButton = document.querySelector('.menu-toggle'); const menu = document.querySelector('#menu');
+menuButton.addEventListener('click', () => { const aberto = menu.classList.toggle('open'); menuButton.setAttribute('aria-expanded', aberto); menuButton.setAttribute('aria-label', aberto ? 'Fechar menu' : 'Abrir menu'); menuButton.innerHTML = `<i class="fa-solid fa-${aberto ? 'xmark' : 'bars'}"></i>`; });
+menu.querySelectorAll('a').forEach(link => link.addEventListener('click', () => { menu.classList.remove('open'); menuButton.setAttribute('aria-expanded', 'false'); menuButton.innerHTML = '<i class="fa-solid fa-bars"></i>'; }));
 
-const destino = new Date("October 12, 2026 11:00:00").getTime();
+const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); } }), { threshold: .14 });
+document.querySelectorAll('.reveal').forEach(item => observer.observe(item));
 
-const dias = document.getElementById("dias");
+const pixButton = document.querySelector('.pix-code'); const pixMessage = document.querySelector('#pixMessage');
+pixButton.addEventListener('click', async () => { try { await navigator.clipboard.writeText(pixButton.dataset.pix); pixMessage.textContent = 'PIX copiado!'; } catch { pixMessage.textContent = 'Copie o número: 54508658806'; } setTimeout(() => pixMessage.textContent = 'Toque para copiar', 2500); });
 
-const horas = document.getElementById("horas");
+const lightbox = document.querySelector('#lightbox'); const lightboxImage = lightbox.querySelector('img');
+document.querySelectorAll('.gallery-item img').forEach(image => image.closest('button').addEventListener('click', () => { lightboxImage.src = image.currentSrc || image.src; lightboxImage.alt = image.alt; lightbox.showModal(); }));
+lightbox.querySelector('.lightbox-close').addEventListener('click', () => lightbox.close()); lightbox.addEventListener('click', event => { if (event.target === lightbox) lightbox.close(); });
 
-const minutos = document.getElementById("minutos");
+const music = document.querySelector('#musica'); const musicButton = document.querySelector('#musicButton');
+musicButton.addEventListener('click', async () => { if (music.paused) { try { await music.play(); musicButton.setAttribute('aria-pressed', 'true'); musicButton.setAttribute('aria-label', 'Pausar música'); musicButton.innerHTML = '<i class="fa-solid fa-pause"></i>'; } catch { musicButton.setAttribute('aria-label', 'Não foi possível tocar a música'); } } else { music.pause(); musicButton.setAttribute('aria-pressed', 'false'); musicButton.setAttribute('aria-label', 'Tocar música'); musicButton.innerHTML = '<i class="fa-solid fa-music"></i>'; } });
 
-const segundos = document.getElementById("segundos");
-
-setInterval(()=>{
-
-    const agora = new Date().getTime();
-
-    const distancia = destino - agora;
-
-    const d = Math.floor(distancia/(1000*60*60*24));
-
-    const h = Math.floor((distancia%(1000*60*60*24))/(1000*60*60));
-
-    const m = Math.floor((distancia%(1000*60*60))/60000);
-
-    const s = Math.floor((distancia%(60000))/1000);
-
-    dias.innerHTML=d;
-
-    horas.innerHTML=h;
-
-    minutos.innerHTML=m;
-
-    segundos.innerHTML=s;
-
-},1000);
-
-/*=========================
-MÚSICA
-=========================*/
-
-const musica = document.getElementById("musica");
-const musicButton = document.getElementById("musicButton");
-
-musicButton.addEventListener("click", () => {
-
-    if (musica.paused) {
-
-        musica.play()
-            .then(() => {
-                musicButton.innerHTML = "⏸️";
-            })
-            .catch(err => {
-                console.error(err);
-                alert(err.message);
-            });
-
-    } else {
-
-        musica.pause();
-        musicButton.innerHTML = "🎵";
-
-    }
-
-});
-/*=========================
-BARRA DE PROGRESSO
-=========================*/
-
-window.addEventListener("scroll",()=>{
-
-    const scroll = document.documentElement.scrollTop;
-
-    const altura =
-    document.documentElement.scrollHeight -
-    document.documentElement.clientHeight;
-
-    const porcentagem = (scroll / altura) * 100;
-
-    document.getElementById("progress").style.width =
-    porcentagem + "%";
-
-});
-
-/*=========================
-BOTÃO VOLTAR AO TOPO
-=========================*/
-
-const topo = document.getElementById("topo");
-
-window.addEventListener("scroll",()=>{
-
-    if(window.scrollY > 300){
-
-        topo.style.display="block";
-
-    }else{
-
-        topo.style.display="none";
-
-    }
-
-});
-
-topo.onclick=()=>{
-
-    window.scrollTo({
-
-        top:0,
-
-        behavior:"smooth"
-
-    });
-
-};
-
-/*=========================
-CONFETES
-=========================*/
-
-
-/*=========================
-BALÕES
-=========================*/
-
-function criarBalao(){
-
-const balao=document.createElement("div");
-
-balao.classList.add("balao");
-
-balao.classList.add(
-
-Math.random()>0.5?"azul":"amarelo"
-
-);
-
-balao.style.left=Math.random()*100+"vw";
-
-balao.style.animationDuration=
-
-8+Math.random()*8+"s";
-
-document.body.appendChild(balao);
-
-setTimeout(()=>{
-
-balao.remove();
-
-},16000);
-
+async function iniciarMusica() {
+  if (!music.paused) return;
+  try { await music.play(); musicButton.setAttribute('aria-pressed', 'true'); musicButton.setAttribute('aria-label', 'Pausar música'); musicButton.innerHTML = '<i class="fa-solid fa-pause"></i>'; } catch { musicButton.setAttribute('aria-label', 'Toque na tela para iniciar a música'); }
 }
+iniciarMusica();
+addEventListener('pointerdown', function tocarNoPrimeiroToque() { iniciarMusica(); removeEventListener('pointerdown', tocarNoPrimeiroToque); }, { once: true });
 
-setInterval(criarBalao,1200);
-/*=========================
-FOGOS DE ARTIFÍCIO
-=========================*/
-    
-
-/*=========================
-PARTÍCULAS BRILHANTES
-=========================*/
-
-const particulas=document.createElement("div");
-
-particulas.className="particulas";
-
-document.body.appendChild(particulas);
-
-for(let i=0;i<80;i++){
-
-    const p=document.createElement("span");
-
-    p.style.left=Math.random()*100+"vw";
-
-    p.style.animationDuration=(6+Math.random()*10)+"s";
-
-    p.style.animationDelay=Math.random()*5+"s";
-
-    particulas.appendChild(p);
-
+const hero = document.querySelector('.hero');
+const partyLayer = document.createElement('div'); partyLayer.className = 'party-layer'; hero.prepend(partyLayer);
+const balloonColors = ['yellow', 'blue', 'navy', 'gold'];
+for (let index = 0; index < 11; index += 1) {
+  const balloon = document.createElement('span');
+  balloon.className = `balloon ${balloonColors[index % balloonColors.length]}`;
+  balloon.style.left = `${3 + index * 9.2}%`;
+  balloon.style.setProperty('--speed', `${13 + (index % 5) * 1.4}s`);
+  balloon.style.setProperty('--delay', `${-index * 1.35}s`);
+  partyLayer.append(balloon);
 }
-
-/*=========================
-GALERIA LIGHTBOX
-=========================*/
-
-const imagens=document.querySelectorAll(".galeria img");
-
-const fundo=document.createElement("div");
-
-fundo.style.position="fixed";
-fundo.style.top="0";
-fundo.style.left="0";
-fundo.style.width="100%";
-fundo.style.height="100%";
-fundo.style.background="rgba(0,0,0,.9)";
-fundo.style.display="none";
-fundo.style.justifyContent="center";
-fundo.style.alignItems="center";
-fundo.style.zIndex="999999";
-
-const foto=document.createElement("img");
-
-foto.style.maxWidth="90%";
-foto.style.maxHeight="90%";
-foto.style.borderRadius="20px";
-foto.style.border="5px solid #FFD000";
-
-fundo.appendChild(foto);
-
-document.body.appendChild(fundo);
-
-imagens.forEach(img=>{
-
-    img.addEventListener("click",()=>{
-
-        fundo.style.display="flex";
-
-        foto.src=img.src;
-
-    });
-
-});
-
-fundo.addEventListener("click",()=>{
-
-    fundo.style.display="none";
-
-});
-
-/*=========================
-ANIMAÇÃO AO ABRIR
-=========================*/
-
-window.addEventListener("load",()=>{
-
-    document.body.style.opacity="0";
-
-    setTimeout(()=>{
-
-        document.body.style.transition="opacity 1.2s";
-
-        document.body.style.opacity="1";
-
-    },200);
-
-});
-/*=========================
-MENSAGEM DE BOAS-VINDAS
-=========================*/
-
-window.addEventListener("load",()=>{
-
-    setTimeout(()=>{
-
-        const aviso=document.createElement("div");
-
-        aviso.innerHTML=`
-        <h2>🎉 Seja bem-vindo!</h2>
-        <p>Obrigado por visitar meu convite de aniversário.</p>
-        `;
-
-        aviso.style.position="fixed";
-        aviso.style.top="30px";
-        aviso.style.left="50%";
-        aviso.style.transform="translateX(-50%)";
-        aviso.style.background="rgba(0,60,157,.95)";
-        aviso.style.color="#fff";
-        aviso.style.padding="20px 35px";
-        aviso.style.borderRadius="20px";
-        aviso.style.border="3px solid #FFD000";
-        aviso.style.zIndex="999999";
-        aviso.style.textAlign="center";
-        aviso.style.boxShadow="0 0 25px rgba(255,208,0,.5)";
-        aviso.style.animation="fadeUp .8s";
-
-        document.body.appendChild(aviso);
-
-        setTimeout(()=>{
-
-            aviso.style.opacity="0";
-            aviso.style.transition=".8s";
-
-            setTimeout(()=>{
-
-                aviso.remove();
-
-            },800);
-
-        },4000);
-
-    },800);
-
-});
-
-/*=========================
-VOLUME DA MÚSICA
-=========================*/
-
-if(musica){
-
-    musica.volume=0.35;
-
+function soltarConfetes(quantidade = 65) {
+  const camada = document.createElement('div'); camada.className = 'confetti'; document.body.append(camada);
+  for (let index = 0; index < quantidade; index += 1) {
+    const confete = document.createElement('span');
+    confete.className = `confetti-piece ${index % 3 === 0 ? 'blue' : index % 5 === 0 ? 'white round' : ''}`;
+    confete.style.left = `${Math.random() * 100}%`; confete.style.setProperty('--fall', `${3.2 + Math.random() * 2.3}s`);
+    confete.style.setProperty('--rotate', `${Math.random() * 360}deg`); camada.append(confete);
+  }
+  setTimeout(() => camada.remove(), 6200);
 }
+soltarConfetes(); document.querySelector('.button-primary').addEventListener('click', () => soltarConfetes(30));
 
-/*=========================
-EFEITO NO BOLO
-=========================*/
+document.querySelectorAll('.detail-card').forEach(card => {
+  card.tabIndex = 0;
+  card.setAttribute('role', 'button');
+  card.setAttribute('aria-pressed', 'false');
+  const alternarDestaque = () => {
+    const vaiAtivar = !card.classList.contains('active');
+    document.querySelectorAll('.detail-card.active').forEach(outro => { outro.classList.remove('active'); outro.setAttribute('aria-pressed', 'false'); });
+    card.classList.toggle('active', vaiAtivar);
+    card.setAttribute('aria-pressed', String(vaiAtivar));
+  };
+  card.addEventListener('click', alternarDestaque);
+  card.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); alternarDestaque(); } });
+});
 
-const bolo=document.querySelector(".cake");
+document.querySelector('#calendarButton').addEventListener('click', () => {
+  const evento = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Convite 18 anos//PT-BR', 'BEGIN:VEVENT',
+    'DTSTART:20261011T120000', 'DTEND:20261011T180000',
+    'SUMMARY:Festa de 18 anos', 'LOCATION:Recanto dos Teixeira\\, Mogi das Cruzes - SP',
+    'DESCRIPTION:Uma tarde de música\\, piscina\\, futebol e comemoração.', 'END:VEVENT', 'END:VCALENDAR'
+  ].join('\r\n');
+  const arquivo = new Blob([evento], { type: 'text/calendar;charset=utf-8' });
+  const link = document.createElement('a'); link.href = URL.createObjectURL(arquivo); link.download = 'festa-de-18-anos.ics'; link.click();
+  setTimeout(() => URL.revokeObjectURL(link.href), 500);
+});
 
-if(bolo){
+const scrollCelebration = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('scrolled-in'); scrollCelebration.unobserve(entry.target); } }), { threshold: .18 });
+document.querySelectorAll('.section, .rsvp').forEach(section => scrollCelebration.observe(section));
 
-setInterval(()=>{
-
-    bolo.animate([
-
-        {transform:"translateY(0px)"},
-
-        {transform:"translateY(-8px)"},
-
-        {transform:"translateY(0px)"}
-
-    ],{
-
-        duration:2000
-
-    });
-
-},2200);
-
+const messageForm = document.querySelector('#messageForm'); const messageWall = document.querySelector('#messageWall'); const messageStatus = document.querySelector('#messageStatus');
+const messageStorageKey = 'convite-18-recados';
+function lerRecados() { try { return JSON.parse(localStorage.getItem(messageStorageKey)) || []; } catch { return []; } }
+function mostrarRecados() {
+  const recados = lerRecados(); messageWall.replaceChildren();
+  if (!recados.length) { const vazio = document.createElement('p'); vazio.className = 'empty-wall'; vazio.textContent = 'Seja a primeira pessoa a deixar um recado ✨'; messageWall.append(vazio); return; }
+  recados.slice(-8).reverse().forEach(recado => { const nota = document.createElement('article'); nota.className = 'message-note'; const nome = document.createElement('strong'); nome.textContent = recado.name; const texto = document.createElement('p'); texto.textContent = recado.message; nota.append(nome, texto); messageWall.append(nota); });
 }
-
-/*=========================
-CURSOR COM BRILHO
-=========================*/
-
-const brilho=document.createElement("div");
-
-brilho.style.position="fixed";
-brilho.style.width="18px";
-brilho.style.height="18px";
-brilho.style.borderRadius="50%";
-brilho.style.background="#FFD000";
-brilho.style.pointerEvents="none";
-brilho.style.zIndex="999999";
-brilho.style.boxShadow="0 0 20px #FFD000";
-
-document.body.appendChild(brilho);
-
-document.addEventListener("mousemove",(e)=>{
-
-    brilho.style.left=e.clientX-9+"px";
-
-    brilho.style.top=e.clientY-9+"px";
-
-});
-
-/*=========================
-EMOJIS FLUTUANDO
-=========================*/
-
-const emojis=["🎉","🎂","🎈","🎁","💙","💛","✨"];
-
-function emoji(){
-
-const e=document.createElement("span");
-
-e.innerHTML=emojis[Math.floor(Math.random()*emojis.length)];
-
-e.style.position="fixed";
-
-e.style.left=Math.random()*100+"vw";
-
-e.style.top="100vh";
-
-e.style.fontSize=(20+Math.random()*20)+"px";
-
-e.style.pointerEvents="none";
-
-e.style.zIndex="9999";
-
-document.body.appendChild(e);
-
-e.animate([
-
-{transform:"translateY(0)",opacity:1},
-
-{transform:"translateY(-120vh)",opacity:0}
-
-],{
-
-duration:6000
-
-});
-
-setTimeout(()=>{
-
-e.remove();
-
-},6000);
-
-}
-
-setInterval(emoji,2500);
-/*=========================================
-EXPLOSÃO DE FOGOS AO ABRIR A PÁGINA
-=========================================*/
-
-window.addEventListener("load",()=>{
-
-    let quantidade = 12;
-
-    let intervalo = setInterval(()=>{
-
-        criarFogo();
-
-        quantidade--;
-
-        if(quantidade<=0){
-
-            clearInterval(intervalo);
-
-        }
-
-    },250);
-
-});
-
-/*=========================================
-BOTÃO COPIAR PIX
-=========================================*/
-
-const pix = document.querySelector(".pixBox");
-
-if(pix){
-
-    pix.style.cursor="pointer";
-
-    pix.title="Clique para copiar";
-
-    pix.addEventListener("click",()=>{
-
-        navigator.clipboard.writeText("54508658806");
-
-        const antigo = pix.innerHTML;
-
-        pix.innerHTML="✅ PIX copiado!";
-
-        setTimeout(()=>{
-
-            pix.innerHTML=antigo;
-
-        },2000);
-
-    });
-
-}
-
-/*=========================================
-VIBRAÇÃO (CELULAR)
-=========================================*/
-
-document.querySelectorAll("a,.botao,.maps,.whatsapp").forEach(botao=>{
-
-    botao.addEventListener("click",()=>{
-
-        if(navigator.vibrate){
-
-            navigator.vibrate(50);
-
-        }
-
-    });
-
-});
-
-/*=========================================
-EFEITO NOS NÚMEROS DO CONTADOR
-=========================================*/
-
-const caixas=document.querySelectorAll(".contador div");
-
-caixas.forEach(caixa=>{
-
-    setInterval(()=>{
-
-        caixa.animate([
-
-            {
-
-                transform:"scale(1)"
-
-            },
-
-            {
-
-                transform:"scale(1.08)"
-
-            },
-
-            {
-
-                transform:"scale(1)"
-
-            }
-
-        ],{
-
-            duration:400
-
-        });
-
-    },1000);
-
-});
-
-/*=========================================
-EFEITO NOS BOTÕES
-=========================================*/
-
-document.querySelectorAll(".botao,.maps,.whatsapp").forEach(btn=>{
-
-    btn.addEventListener("mouseenter",()=>{
-
-        btn.animate([
-
-            {transform:"scale(1)"},
-
-            {transform:"scale(1.08)"}
-
-        ],{
-
-            duration:250,
-
-            fill:"forwards"
-
-        });
-
-    });
-
-    btn.addEventListener("mouseleave",()=>{
-
-        btn.animate([
-
-            {transform:"scale(1.08)"},
-
-            {transform:"scale(1)"}
-
-        ],{
-
-            duration:250,
-
-            fill:"forwards"
-
-        });
-
-    });
-
-});
-
-/*=========================================
-REVELAR ELEMENTOS
-=========================================*/
-
-const revelar=document.querySelectorAll("section");
-
-const observer=new IntersectionObserver((itens)=>{
-
-    itens.forEach(item=>{
-
-        if(item.isIntersecting){
-
-            item.target.style.opacity="1";
-
-            item.target.style.transform="translateY(0)";
-
-        }
-
-    });
-
-});
-
-revelar.forEach(sec=>{
-
-    sec.style.opacity="0";
-
-    sec.style.transform="translateY(60px)";
-
-    sec.style.transition="1s";
-
-    observer.observe(sec);
-
-});
-/*=========================================
-MODO NOTURNO AUTOMÁTICO
-=========================================*/
-
-const hora = new Date().getHours();
-
-if(hora >= 18 || hora <= 6){
-
-    document.body.style.filter="brightness(.97)";
-
-}
-
-/*=========================================
-EFEITO NAS IMAGENS
-=========================================*/
-
-document.querySelectorAll(".galeria img").forEach(img=>{
-
-    img.addEventListener("mouseover",()=>{
-
-        img.style.transform="scale(1.08) rotate(2deg)";
-
-    });
-
-    img.addEventListener("mouseout",()=>{
-
-        img.style.transform="scale(1)";
-
-    });
-
-});
-
-/*=========================================
-MENSAGEM QUANDO CHEGAR O DIA
-=========================================*/
-
-function verificarData(){
-
-    const agora = new Date();
-
-    const festa = new Date("October 12, 2026 11:00:00");
-
-    if(agora >= festa){
-
-        document.querySelector(".hero h1").innerHTML="🎉 O GRANDE DIA CHEGOU! 🎉";
-
-        document.querySelector(".hero p").innerHTML=
-
-        "A festa começou! Muito obrigado pela sua presença! 💙💛";
-
-    }
-
-}
-
-setInterval(verificarData,1000);
-
-/*=========================================
-ATALHO TECLADO
-=========================================*/
-
-document.addEventListener("keydown",(e)=>{
-
-    if(e.key==="Home"){
-
-        window.scrollTo({
-
-            top:0,
-
-            behavior:"smooth"
-
-        });
-
-    }
-
-});
-
-/*=========================================
-SCROLL SUAVE LINKS
-=========================================*/
-
-document.querySelectorAll('a[href^="#"]').forEach(link=>{
-
-    link.addEventListener("click",(e)=>{
-
-        e.preventDefault();
-
-        const destino=document.querySelector(
-
-            link.getAttribute("href")
-
-        );
-
-        destino.scrollIntoView({
-
-            behavior:"smooth"
-
-        });
-
-    });
-
-});
-
-/*=========================================
-ANIMAÇÃO DOS CARDS
-=========================================*/
-
-document.querySelectorAll(".card").forEach(card=>{
-
-    card.addEventListener("mouseenter",()=>{
-
-        card.style.transform="translateY(-12px)";
-
-    });
-
-    card.addEventListener("mouseleave",()=>{
-
-        card.style.transform="translateY(0px)";
-
-    });
-
-});
-
-/*=========================================
-EFEITO NO PIX
-=========================================*/
-
-const pixBox=document.querySelector(".pixBox");
-
-if(pixBox){
-
-pixBox.addEventListener("mouseenter",()=>{
-
-pixBox.style.boxShadow="0 0 30px #FFD000";
-
-});
-
-pixBox.addEventListener("mouseleave",()=>{
-
-pixBox.style.boxShadow="0 0 10px rgba(255,208,0,.4)";
-
-});
-
-}
-
-/*=========================================
-CONSOLE
-=========================================*/
-
-console.clear();
-
-console.log("%c🎉 Convite de 18 anos carregado com sucesso! 💙💛",
-
-"color:#FFD000;font-size:18px;font-weight:bold;");
-
-/*=========================================
-FIM DO SCRIPT
-=========================================*/
-
+messageForm.addEventListener('submit', event => { event.preventDefault(); const dados = new FormData(messageForm); const name = dados.get('name').trim(); const message = dados.get('message').trim(); if (!name || !message) return; const recados = lerRecados(); recados.push({ name, message }); localStorage.setItem(messageStorageKey, JSON.stringify(recados.slice(-30))); messageForm.reset(); mostrarRecados(); messageStatus.textContent = 'Recado publicado no mural!'; setTimeout(() => messageStatus.textContent = '', 3500); });
+mostrarRecados();
